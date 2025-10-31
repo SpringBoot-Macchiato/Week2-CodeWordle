@@ -6,9 +6,19 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * Service for word validation and feedback generation
+ */
 @Service
 public class WordValidationService {
 
+    /**
+     * Generate letter-by-letter feedback for a guess
+     *
+     * @param guess The word guess
+     * @param targetWord The target word to compare against
+     * @return List of letter feedback with status (CORRECT, PRESENT, ABSENT)
+     */
     public List<LetterFeedback> generateFeedback(String guess, String targetWord) {
         char[] guessChars = guess.toLowerCase().toCharArray();
         char[] targetChars = targetWord.toLowerCase().toCharArray();
@@ -43,6 +53,14 @@ public class WordValidationService {
         return List.of(feedback);
     }
 
+    /**
+     * Check if a guess is valid for the game
+     *
+     * @param guess The word to validate
+     * @param targetWord The target word (for length comparison)
+     * @param validWords List of valid words for the theme
+     * @return true if guess is valid, false otherwise
+     */
     public boolean isValidGuess(String guess, String targetWord, List<String> validWords) {
         if (guess == null || targetWord == null) {
             return false;

@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Main service for game operations and business logic
+ */
 @Service
 public class GameService {
 
@@ -32,10 +35,22 @@ public class GameService {
         this.wordValidationService = wordValidationService;
     }
 
+    /**
+     * Get all available themes
+     *
+     * @return List of all themes
+     */
     public List<Theme> getAllThemes() {
         return themeRepository.findAll();
     }
 
+    /**
+     * Start a new game session with random word from theme
+     *
+     * @param themeId ID of the theme to use
+     * @return New game session
+     * @throws IllegalArgumentException if no words available for theme
+     */
     public GameSession startNewGame(Long themeId) {
         Optional<Word> randomWord = wordRepository.findRandomByThemeId(themeId);
         if (randomWord.isEmpty()) {
@@ -51,6 +66,13 @@ public class GameService {
         return gameSessionService.save(gameSession);
     }
 
+    /**
+     * Validate a guess and provide feedback
+     *
+     * @param gameSessionId ID of the game session
+     * @param guess The word to validate
+     * @return Validation result with feedback and game status
+     */
     public GuessValidation validateGuess(Long gameSessionId, String guess) {
         Optional<GameSession> gameSessionOpt = gameSessionService.getGameSession(gameSessionId);
         if (gameSessionOpt.isEmpty()) {

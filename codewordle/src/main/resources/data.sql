@@ -7,54 +7,54 @@ INSERT INTO themes (name, description) VALUES
 ('DEVOPS', 'DevOps tools and practices'),
 ('DATABASE', 'Database and SQL concepts');
 
--- Insert Java words
+-- Insert Java words (5 letters only)
 INSERT INTO words (word, theme_id) VALUES
 ('CLASS', 1),
-('OBJECT', 1),
-('METHOD', 1),
-('STRING', 1),
 ('ARRAY', 1),
-('LOOP', 1),
-('THREAD', 1),
-('STREAM', 1),
-('LAMBDA', 1),
-('EXCEPTION', 1);
+('FIELD', 1),
+('BYTES', 1),
+('SHORT', 1),
+('FLOAT', 1),
+('FINAL', 1),
+('SUPER', 1),
+('VALUE', 1),
+('STACK', 1);
 
--- Insert Spring words
+-- Insert Spring words (5 letters only)
 INSERT INTO words (word, theme_id) VALUES
-('BEAN', 2),
-('CONTEXT', 2),
-('BOOT', 2),
-('MVC', 2),
-('REST', 2),
-('AOP', 2),
-('IOC', 2),
-('JPA', 2),
-('JDBC', 2),
-('SECURITY', 2);
+('BEANS', 2),
+('BOOTS', 2),
+('MODEL', 2),
+('FRAME', 2),
+('SCOPE', 2),
+('INJEC', 2),
+('QUERY', 2),
+('DRIVE', 2),
+('TESTS', 2),
+('CACHE', 2);
 
--- Insert DevOps words
+-- Insert DevOps words (5 letters only)
 INSERT INTO words (word, theme_id) VALUES
-('DOCKER', 3),
-('KUBE', 3),
-('GIT', 3),
-('JENKINS', 3),
-('CI', 3),
-('CD', 3),
-('MONITOR', 3),
+('MERGE', 3),
+('PIPEL', 3),
+('DEPLY', 3),
 ('SCALE', 3),
-('DEPLOY', 3),
-('CLOUD', 3);
+('CLOUD', 3),
+('AGILE', 3),
+('BUILD', 3),
+('DEPOT', 3),
+('KUBES', 3),
+('PIPES', 3);
 
--- Insert Database words
+-- Insert Database words (5 letters only)
 INSERT INTO words (word, theme_id) VALUES
 ('QUERY', 4),
 ('TABLE', 4),
 ('INDEX', 4),
-('JOIN', 4),
-('KEY', 4),
-('SCHEMA', 4),
-('TRANSACTION', 4),
-('NORMALIZATION', 4),
-('VIEW', 4),
-('TRIGGER', 4);
+('JOINS', 4),
+('FOREI', 4),
+('VIEWS', 4),
+('SCHEM', 4),
+('DATAS', 4),
+('TUPLE', 4),
+('COLUM', 4);

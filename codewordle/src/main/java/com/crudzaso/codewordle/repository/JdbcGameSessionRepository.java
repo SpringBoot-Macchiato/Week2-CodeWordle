@@ -39,7 +39,8 @@ public class JdbcGameSessionRepository implements GameSessionRepository {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            // Specify the column names we want to retrieve (only 'id')
+            PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
             ps.setLong(1, gameSession.getTargetWordId());
             ps.setLong(2, gameSession.getThemeId());
             ps.setString(3, gameSession.getStatus().name());

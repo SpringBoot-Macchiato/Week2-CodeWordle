@@ -1,3 +1,5 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -39,7 +41,7 @@
             <!-- Current Guess Input -->
             <form id="guess-form" class="space-y-4">
                 <div class="flex justify-center space-x-1 mb-4">
-                    <c:forEach begin="1" end="5" varStatus="status">
+                    <c:forEach begin="1" end="${wordLength}" varStatus="status">
                         <input type="text"
                                maxlength="1"
                                class="w-12 h-12 text-center text-xl font-bold border-2 border-gray-300 rounded focus:border-indigo-500 focus:outline-none uppercase"
@@ -144,9 +146,17 @@
 
     <script>
         const gameSessionId = ${gameSession.id};
+        const wordLength = ${wordLength};
 
         // Move to next input on character entry
         function moveToNext(input, event) {
+            // Validate input is a letter
+            if (input.value && !/^[a-zA-Z]$/.test(input.value)) {
+                input.value = '';
+                alert('Only letters are allowed');
+                return;
+            }
+
             if (input.value.length === 1) {
                 const next = input.nextElementSibling;
                 if (next && next.tagName === 'INPUT') {
@@ -192,10 +202,13 @@
             let guess = '';
             inputs.forEach(input => guess += input.value);
 
-            if (guess.length !== 5) {
-                alert('Please enter a 5-letter word');
+            if (guess.length !== wordLength) {
+                alert('Please enter a ' + wordLength + '-letter word');
                 return;
             }
+
+            // Convert to uppercase to match database format
+            guess = guess.toUpperCase();
 
             try {
                 const response = await fetch(`/game/${gameSessionId}/guess`, {
@@ -203,7 +216,7 @@
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
                     },
-                    body: `guess=${guess}`
+                    body: new URLSearchParams({ guess: guess })
                 });
 
                 const result = await response.json();

@@ -112,7 +112,8 @@ public class GameService {
 
         // Save attempt
         int attemptNumber = attemptService.getNextAttemptNumber(gameSessionId);
-        attemptService.saveAttempt(gameSessionId, guess, attemptNumber, feedback.toString());
+        String feedbackJson = serializeFeedback(feedback);
+        attemptService.saveAttempt(gameSessionId, guess, attemptNumber, feedbackJson);
 
         // Check game status
         boolean gameWon = guess.equalsIgnoreCase(targetWord);
@@ -130,6 +131,23 @@ public class GameService {
 
     private GuessValidation createInvalidValidation(String message) {
         return new GuessValidation(false, message, null, false, false);
+    }
+
+    private String serializeFeedback(List<LetterFeedback> feedback) {
+        StringBuilder json = new StringBuilder("[");
+        for (int i = 0; i < feedback.size(); i++) {
+            LetterFeedback letter = feedback.get(i);
+            json.append("{\"letter\":\"")
+                .append(letter.getLetter())
+                .append("\",\"status\":\"")
+                .append(letter.getStatus())
+                .append("\"}");
+            if (i < feedback.size() - 1) {
+                json.append(",");
+            }
+        }
+        json.append("]");
+        return json.toString();
     }
 
     public List<Attempt> getGameHistory(Long gameSessionId) {return attemptService.getGameHistory(gameSessionId);

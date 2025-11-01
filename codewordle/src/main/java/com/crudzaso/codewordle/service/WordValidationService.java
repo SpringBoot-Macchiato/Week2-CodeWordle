@@ -70,6 +70,11 @@ public class WordValidationService {
             return false;
         }
 
+        // Validate that guess contains only letters
+        if (!guess.matches("^[a-zA-Z]+$")) {
+            return false;
+        }
+
         return validWords.stream()
                 .anyMatch(word -> word.equalsIgnoreCase(guess));
     }

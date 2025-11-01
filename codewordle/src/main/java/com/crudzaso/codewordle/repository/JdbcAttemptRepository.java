@@ -8,7 +8,6 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import java.sql.PreparedStatement;
-import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -29,7 +28,7 @@ public class JdbcAttemptRepository implements AttemptRepository {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
             ps.setLong(1, attempt.getGameSessionId());
             ps.setString(2, attempt.getGuessWord());
             ps.setInt(3, attempt.getAttemptNumber());
@@ -38,8 +37,8 @@ public class JdbcAttemptRepository implements AttemptRepository {
             return ps;
         }, keyHolder);
 
-        Long generatedId = keyHolder.getKeyAs(Long.class);
-        attempt.setId(generatedId);
+        Number generatedId = keyHolder.getKey();
+        attempt.setId(generatedId != null ? generatedId.longValue() : null);
         return attempt;
     }
 

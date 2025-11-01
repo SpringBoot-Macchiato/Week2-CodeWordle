@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS attempts (
     game_session_id BIGINT NOT NULL,
     guess_word VARCHAR(50) NOT NULL,
     attempt_number INT NOT NULL,
-    feedback VARCHAR(100) NOT NULL,
+    feedback VARCHAR(500) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (game_session_id) REFERENCES game_sessions(id),
     UNIQUE(game_session_id, attempt_number)

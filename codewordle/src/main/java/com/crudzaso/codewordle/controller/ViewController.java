@@ -1,14 +1,14 @@
 package com.crudzaso.codewordle.controller;
 
-import com.crudzaso.codewordle.model.GameSession;
-import com.crudzaso.codewordle.model.GuessValidation;
-import com.crudzaso.codewordle.model.Theme;
+import com.crudzaso.codewordle.model.*;
 import com.crudzaso.codewordle.service.GameService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * MVC Controller for web views
@@ -66,15 +66,61 @@ public class ViewController {
         GameSession gameSession = gameSessionOpt.get();
         model.addAttribute("gameSession", gameSession);
 
-        // Get game history
+        // Get game history and parse feedback
         var gameHistory = gameService.getGameHistory(gameSessionId);
-        model.addAttribute("attempts", gameHistory);
+        List<AttemptWithFeedback> attemptsWithFeedback = parseFeedbackFromAttempts(gameHistory);
+        model.addAttribute("attempts", attemptsWithFeedback);
 
         // Get available themes for navigation
         List<Theme> themes = gameService.getAllThemes();
         model.addAttribute("themes", themes);
 
+        // Get target word length for dynamic UI
+        int wordLength = getTargetWordLength(gameSession.getTargetWordId());
+        model.addAttribute("wordLength", wordLength);
+
         return "game";
+    }
+
+    /**
+     * Get the length of the target word
+     *
+     * @param targetWordId ID of the target word
+     * @return Length of the target word
+     */
+    private int getTargetWordLength(Long targetWordId) {
+        // Since all words are now standardized to 5 letters, return 5
+        return 5;
+    }
+
+    /**
+     * Parse feedback JSON from attempts and convert to AttemptWithFeedback objects
+     *
+     * @param attempts List of attempts with JSON feedback
+     * @return List of AttemptWithFeedback with parsed feedback
+     */
+    private List<AttemptWithFeedback> parseFeedbackFromAttempts(List<Attempt> attempts) {
+        List<AttemptWithFeedback> result = new ArrayList<>();
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        for (Attempt attempt : attempts) {
+            try {
+                // Parse JSON feedback string to List<LetterFeedback>
+                String feedbackJson = attempt.getFeedback();
+                List<LetterFeedback> feedback = objectMapper.readValue(
+                    feedbackJson,
+                    objectMapper.getTypeFactory().constructCollectionType(List.class, LetterFeedback.class)
+                );
+
+                result.add(new AttemptWithFeedback(attempt, feedback));
+            } catch (Exception e) {
+                // If parsing fails, create empty feedback
+                System.err.println("Error parsing feedback for attempt " + attempt.getId() + ": " + e.getMessage());
+                result.add(new AttemptWithFeedback(attempt, new ArrayList<>()));
+            }
+        }
+
+        return result;
     }
 
     /**

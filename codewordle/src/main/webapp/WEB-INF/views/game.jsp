@@ -1,162 +1,264 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CodeWordle - Game</title>
+    <title>CodeWordle - Juego en Progreso</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style type="text/tailwindcss">
+        @layer base {
+            body {
+                font-family: 'Inter', sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                background-attachment: fixed;
+            }
+        }
+
+        @layer utilities {
+            .glass {
+                background: rgba(255, 255, 255, 0.1);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+            }
+
+            .glass-strong {
+                background: rgba(255, 255, 255, 0.15);
+                backdrop-filter: blur(25px);
+                -webkit-backdrop-filter: blur(25px);
+                border: 1px solid rgba(255, 255, 255, 0.3);
+            }
+
+            .letter-box {
+                @apply w-14 h-14 md:w-16 md:h-16 flex items-center justify-center text-2xl md:text-3xl font-bold rounded-xl transition-all duration-300;
+                background: rgba(255, 255, 255, 0.15);
+                backdrop-filter: blur(10px);
+                border: 2px solid rgba(255, 255, 255, 0.3);
+                color: white;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+                text-align: center;
+                padding: 0;
+                line-height: 1;
+            }
+
+            .letter-box.correct {
+                background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                border-color: #10b981;
+                animation: flip 0.6s ease, pulse 0.3s ease 0.6s;
+            }
+
+            .letter-box.present {
+                background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+                border-color: #f59e0b;
+                animation: flip 0.6s ease, pulse 0.3s ease 0.6s;
+            }
+
+            .letter-box.absent {
+                background: rgba(107, 114, 128, 0.5);
+                border-color: #6b7280;
+                opacity: 0.6;
+                animation: flip 0.6s ease;
+            }
+
+            .letter-box:focus {
+                outline: none;
+                border-color: white;
+                box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+                background: rgba(255, 255, 255, 0.2);
+            }
+
+            .letter-box.empty {
+                opacity: 0.4;
+                background: rgba(255, 255, 255, 0.08);
+            }
+        }
+
+        @keyframes flip {
+            0% { transform: rotateX(0deg); }
+            50% { transform: rotateX(90deg); }
+            100% { transform: rotateX(0deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
 </head>
-<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
-    <div class="container mx-auto px-4 py-8">
+<body class="min-h-screen">
+    <div class="container mx-auto px-4 py-6 md:py-8 relative z-10">
         <!-- Header -->
-        <header class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-indigo-800 mb-2">CodeWordle</h1>
-            <div class="flex justify-center space-x-4 mb-4">
-                <a href="/" class="text-indigo-600 hover:text-indigo-800 transition-colors">Home</a>
-                <span class="text-gray-400">|</span>
-                <button onclick="restartGame()" class="text-indigo-600 hover:text-indigo-800 transition-colors">New Game</button>
+        <header class="text-center mb-6 md:mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4 text-white drop-shadow-lg">
+                CODEWORDLE
+            </h1>
+            <div class="flex flex-wrap justify-center items-center gap-4 text-sm md:text-base">
+                <a href="/" class="text-white hover:bg-white/20 px-4 py-2 rounded-lg transition-all font-semibold">
+                    🏠 Inicio
+                </a>
+                <span class="text-white/50">•</span>
+                <button onclick="restartGame()" class="text-white hover:bg-white/20 px-4 py-2 rounded-lg transition-all font-semibold">
+                    🔄 Nueva Partida
+                </button>
             </div>
         </header>
 
-        <!-- Game Board -->
-        <div class="max-w-md mx-auto bg-white rounded-xl shadow-lg p-6 mb-6">
-            <!-- Attempts Display -->
-            <div id="attempts-container" class="space-y-2 mb-6">
-                <c:forEach var="attempt" items="${attempts}" varStatus="status">
-                    <div class="flex justify-center space-x-1">
-                        <c:forEach var="letter" items="${attempt.feedback}">
-                            <div class="w-12 h-12 flex items-center justify-center text-xl font-bold border-2 rounded
-                                      ${letter.status == 'CORRECT' ? 'bg-green-500 text-white border-green-500' :
-                                        letter.status == 'PRESENT' ? 'bg-yellow-500 text-white border-yellow-500' :
-                                        'bg-gray-200 text-gray-700 border-gray-300'}">
-                                ${letter.letter}
-                            </div>
-                        </c:forEach>
+        <!-- Game Board Container -->
+        <div class="max-w-2xl mx-auto">
+            <!-- Game Status Bar -->
+            <div class="glass-strong rounded-2xl p-4 md:p-6 mb-6 shadow-xl">
+                <div class="grid grid-cols-3 gap-4 text-center">
+                    <div class="space-y-1">
+                        <p class="text-white/70 text-xs md:text-sm uppercase tracking-wider font-semibold">Intentos</p>
+                        <p class="text-white text-2xl md:text-3xl font-bold" id="attempts-count">${fn:length(attempts)}/6</p>
                     </div>
-                </c:forEach>
+                    <div class="space-y-1">
+                        <p class="text-white/70 text-xs md:text-sm uppercase tracking-wider font-semibold">Estado</p>
+                        <c:choose>
+                            <c:when test="${gameSession.status == 'WON'}">
+                                <span class="inline-block px-4 py-2 bg-green-500/30 border-2 border-green-400 rounded-xl text-white font-bold text-sm md:text-base shadow-lg">
+                                    ✓ Victoria
+                                </span>
+                            </c:when>
+                            <c:when test="${gameSession.status == 'LOST'}">
+                                <span class="inline-block px-4 py-2 bg-red-500/30 border-2 border-red-400 rounded-xl text-white font-bold text-sm md:text-base shadow-lg">
+                                    ✗ Derrota
+                                </span>
+                            </c:when>
+                            <c:otherwise>
+                                <span class="inline-block px-4 py-2 bg-blue-500/30 border-2 border-blue-400 rounded-xl text-white font-bold text-sm md:text-base shadow-lg animate-pulse">
+                                    ● En Curso
+                                </span>
+                            </c:otherwise>
+                        </c:choose>
+                    </div>
+                    <div class="space-y-1">
+                        <p class="text-white/70 text-xs md:text-sm uppercase tracking-wider font-semibold">Tema</p>
+                        <p class="text-white text-xl md:text-2xl font-bold">
+                            <c:choose>
+                                <c:when test="${gameSession.themeId == 1}">☕ Java</c:when>
+                                <c:when test="${gameSession.themeId == 2}">🌱 Spring</c:when>
+                                <c:when test="${gameSession.themeId == 3}">⚙️ DevOps</c:when>
+                                <c:when test="${gameSession.themeId == 4}">🗄️ Database</c:when>
+                            </c:choose>
+                        </p>
+                    </div>
+                </div>
             </div>
 
-            <!-- Current Guess Input -->
-            <form id="guess-form" class="space-y-4">
-                <div class="flex justify-center space-x-1 mb-4">
-                    <c:forEach begin="1" end="${wordLength}" varStatus="status">
-                        <input type="text"
-                               maxlength="1"
-                               class="w-12 h-12 text-center text-xl font-bold border-2 border-gray-300 rounded focus:border-indigo-500 focus:outline-none uppercase"
-                               oninput="moveToNext(this, event)"
-                               onkeydown="handleKeyDown(this, event)">
+            <!-- Attempts Display (Previous Guesses) -->
+            <div class="glass-strong rounded-2xl p-6 md:p-8 mb-6 shadow-xl">
+                <div id="attempts-container" class="space-y-3">
+                    <c:forEach var="attempt" items="${attempts}" varStatus="status">
+                        <div class="flex justify-center gap-2" data-attempt="${status.index + 1}">
+                            <c:forEach var="letter" items="${attempt.feedback}">
+                                <div class="letter-box ${letter.status == 'CORRECT' ? 'correct' :
+                                          letter.status == 'PRESENT' ? 'present' : 'absent'}">
+                                    ${letter.letter}
+                                </div>
+                            </c:forEach>
+                        </div>
+                    </c:forEach>
+
+                    <!-- Empty rows for remaining attempts -->
+                    <c:forEach begin="${fn:length(attempts) + 1}" end="6" varStatus="status">
+                        <div class="flex justify-center gap-2" data-attempt="${status.index + fn:length(attempts)}">
+                            <c:forEach begin="1" end="${wordLength}">
+                                <div class="letter-box empty"></div>
+                            </c:forEach>
+                        </div>
                     </c:forEach>
                 </div>
+            </div>
 
-                <div class="flex justify-center space-x-2">
-                    <button type="submit"
-                            class="bg-indigo-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-indigo-700 transition-colors duration-200">
-                        Submit Guess
-                    </button>
-                    <button type="button"
-                            onclick="clearInput()"
-                            class="bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors duration-200">
-                        Clear
-                    </button>
+            <!-- Current Guess Input (Only show if game is in progress) -->
+            <c:if test="${gameSession.status == 'IN_PROGRESS'}">
+                <div class="glass-strong rounded-2xl p-6 md:p-8 shadow-xl">
+                    <form id="guess-form" class="space-y-6">
+                        <div class="flex justify-center gap-2 mb-4" id="input-container">
+                            <c:forEach begin="1" end="${wordLength}" varStatus="status">
+                                <input type="text"
+                                       maxlength="1"
+                                       class="letter-box uppercase"
+                                       data-index="${status.index - 1}"
+                                       oninput="handleInput(this, event)"
+                                       onkeydown="handleKeyDown(this, event)"
+                                       autocomplete="off"
+                                       autocapitalize="characters">
+                            </c:forEach>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <button type="button"
+                                    onclick="clearInput()"
+                                    class="glass text-white font-bold py-4 px-6 rounded-xl
+                                           hover:bg-red-500/30 hover:border-red-400 transition-all duration-300
+                                           uppercase tracking-wide text-sm md:text-base">
+                                ✗ Limpiar
+                            </button>
+                            <button type="submit"
+                                    class="glass text-white font-bold py-4 px-6 rounded-xl
+                                           hover:bg-green-500/30 hover:border-green-400 transition-all duration-300
+                                           uppercase tracking-wide text-sm md:text-base">
+                                ✓ Enviar
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Helper Text -->
+                    <div class="mt-6 text-center">
+                        <p class="text-white/70 text-sm md:text-base">
+                            Escribe cualquier palabra de <span class="font-bold text-white">${wordLength} letras</span> y presiona <span class="font-bold text-white">ENTER</span>
+                        </p>
+                    </div>
                 </div>
-            </form>
-
-            <!-- Game Status -->
-            <div id="game-status" class="mt-4 text-center">
-                <c:choose>
-                    <c:when test="${gameSession.status == 'WON'}">
-                        <div class="flex items-center justify-center text-green-600 font-semibold text-lg">
-                            <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                            </svg>
-                            Congratulations! You won!
-                        </div>
-                    </c:when>
-                    <c:when test="${gameSession.status == 'LOST'}">
-                        <div class="flex items-center justify-center text-red-600 font-semibold text-lg">
-                            <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-                            </svg>
-                            Game Over! Try again!
-                        </div>
-                    </c:when>
-                    <c:otherwise>
-                        <div class="text-gray-600">Attempts: ${fn:length(attempts)}/6</div>
-                    </c:otherwise>
-                </c:choose>
-            </div>
+            </c:if>
         </div>
+    </div>
 
-        <!-- Keyboard -->
-        <div class="max-w-md mx-auto bg-white rounded-xl shadow-lg p-4">
-            <div class="flex justify-center space-x-1 mb-2">
-                <c:forEach var="letter" items="Q,W,E,R,T,Y,U,I,O,P">
-                    <button onclick="addLetter('${letter}')"
-                            class="keyboard-key bg-gray-200 text-gray-800 font-semibold py-2 px-3 rounded hover:bg-gray-300 transition-colors">
-                        ${letter}
-                    </button>
-                </c:forEach>
-            </div>
-            <div class="flex justify-center space-x-1 mb-2">
-                <c:forEach var="letter" items="A,S,D,F,G,H,J,K,L">
-                    <button onclick="addLetter('${letter}')"
-                            class="keyboard-key bg-gray-200 text-gray-800 font-semibold py-2 px-3 rounded hover:bg-gray-300 transition-colors">
-                        ${letter}
-                    </button>
-                </c:forEach>
-            </div>
-            <div class="flex justify-center space-x-1">
-                <button onclick="addLetter('Z')"
-                        class="keyboard-key bg-gray-200 text-gray-800 font-semibold py-2 px-3 rounded hover:bg-gray-300 transition-colors">
-                    Z
-                </button>
-                <button onclick="addLetter('X')"
-                        class="keyboard-key bg-gray-200 text-gray-800 font-semibold py-2 px-3 rounded hover:bg-gray-300 transition-colors">
-                    X
-                </button>
-                <button onclick="addLetter('C')"
-                        class="keyboard-key bg-gray-200 text-gray-800 font-semibold py-2 px-3 rounded hover:bg-gray-300 transition-colors">
-                    C
-                </button>
-                <button onclick="addLetter('V')"
-                        class="keyboard-key bg-gray-200 text-gray-800 font-semibold py-2 px-3 rounded hover:bg-gray-300 transition-colors">
-                    V
-                </button>
-                <button onclick="addLetter('B')"
-                        class="keyboard-key bg-gray-200 text-gray-800 font-semibold py-2 px-3 rounded hover:bg-gray-300 transition-colors">
-                    B
-                </button>
-                <button onclick="addLetter('N')"
-                        class="keyboard-key bg-gray-200 text-gray-800 font-semibold py-2 px-3 rounded hover:bg-gray-300 transition-colors">
-                    N
-                </button>
-                <button onclick="addLetter('M')"
-                        class="keyboard-key bg-gray-200 text-gray-800 font-semibold py-2 px-3 rounded hover:bg-gray-300 transition-colors">
-                    M
-                </button>
-                <button onclick="clearInput()"
-                        class="bg-red-500 text-white font-semibold py-2 px-3 rounded hover:bg-red-600 transition-colors">
-                    ⌫
-                </button>
-            </div>
-        </div>
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="hidden fixed inset-0 bg-black/50 backdrop-blur-md flex flex-col items-center justify-center z-50">
+        <div class="w-16 h-16 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
+        <p class="text-white text-xl font-semibold mt-4 tracking-wide">Procesando...</p>
     </div>
 
     <script>
         const gameSessionId = ${gameSession.id};
         const wordLength = ${wordLength};
+        const currentAttempts = ${fn:length(attempts)};
+        const gameStatus = '${gameSession.status}';
 
-        // Move to next input on character entry
-        function moveToNext(input, event) {
+        // Handle input navigation
+        function handleInput(input, event) {
+            // Convert to uppercase
+            input.value = input.value.toUpperCase();
+
             // Validate input is a letter
-            if (input.value && !/^[a-zA-Z]$/.test(input.value)) {
+            if (input.value && !/^[A-ZÑ]$/.test(input.value)) {
                 input.value = '';
-                alert('Only letters are allowed');
+                input.style.animation = 'shake 0.3s';
+                setTimeout(() => input.style.animation = '', 300);
                 return;
             }
 
+            // Move to next input
             if (input.value.length === 1) {
                 const next = input.nextElementSibling;
                 if (next && next.tagName === 'INPUT') {
@@ -171,44 +273,49 @@
                 const prev = input.previousElementSibling;
                 if (prev && prev.tagName === 'INPUT') {
                     prev.focus();
+                    prev.value = '';
                 }
-            }
-        }
-
-        // Add letter from virtual keyboard
-        function addLetter(letter) {
-            const inputs = document.querySelectorAll('#guess-form input[type="text"]');
-            for (let input of inputs) {
-                if (!input.value) {
-                    input.value = letter;
-                    moveToNext(input, null);
-                    break;
-                }
+            } else if (event.key === 'Enter') {
+                event.preventDefault();
+                document.getElementById('guess-form').dispatchEvent(new Event('submit'));
             }
         }
 
         // Clear all inputs
         function clearInput() {
-            const inputs = document.querySelectorAll('#guess-form input[type="text"]');
+            const inputs = document.querySelectorAll('#input-container input');
             inputs.forEach(input => input.value = '');
             inputs[0].focus();
         }
 
         // Submit guess via AJAX
-        document.getElementById('guess-form').addEventListener('submit', async (e) => {
+        document.getElementById('guess-form')?.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const inputs = document.querySelectorAll('#guess-form input[type="text"]');
+            // Get submit button and disable it immediately
+            const submitButton = e.target.querySelector('button[type="submit"]');
+            if (submitButton.disabled) return; // Prevent double submission
+
+            submitButton.disabled = true;
+            const originalButtonText = submitButton.innerHTML;
+            submitButton.innerHTML = '⌛ Enviando...';
+            submitButton.style.opacity = '0.6';
+
+            const inputs = document.querySelectorAll('#input-container input');
             let guess = '';
             inputs.forEach(input => guess += input.value);
 
             if (guess.length !== wordLength) {
-                alert('Please enter a ' + wordLength + '-letter word');
+                alert(`Debes ingresar ${wordLength} letras`);
+                // Re-enable button on validation error
+                submitButton.disabled = false;
+                submitButton.innerHTML = originalButtonText;
+                submitButton.style.opacity = '1';
                 return;
             }
 
-            // Convert to uppercase to match database format
-            guess = guess.toUpperCase();
+            // Show loading
+            document.getElementById('loading-overlay').classList.remove('hidden');
 
             try {
                 const response = await fetch(`/game/${gameSessionId}/guess`, {
@@ -221,28 +328,74 @@
 
                 const result = await response.json();
 
+                // Hide loading
+                document.getElementById('loading-overlay').classList.add('hidden');
+
                 if (result.valid) {
-                    // Reload page to show updated attempts
-                    window.location.reload();
+                    // Animate the new row with feedback
+                    animateNewAttempt(guess, result.feedback);
+
+                    // Wait for animations to complete
+                    setTimeout(() => {
+                        // Check if game ended
+                        if (result.gameWon) {
+                            alert('¡Felicidades! ¡Has ganado!');
+                            setTimeout(() => window.location.reload(), 1000);
+                        } else if (result.gameOver) {
+                            alert('¡Juego terminado! Se acabaron los intentos.');
+                            setTimeout(() => window.location.reload(), 1000);
+                        } else {
+                            // Reload page for next attempt
+                            window.location.reload();
+                        }
+                    }, 2000);
                 } else {
-                    alert(result.message);
+                    alert(result.message || 'Palabra no válida');
+                    // Re-enable button on invalid word
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = originalButtonText;
+                    submitButton.style.opacity = '1';
                 }
             } catch (error) {
-                alert('Error submitting guess');
+                document.getElementById('loading-overlay').classList.add('hidden');
+                alert('Error al procesar tu respuesta');
                 console.error('Error:', error);
+                // Re-enable button on error
+                submitButton.disabled = false;
+                submitButton.innerHTML = originalButtonText;
+                submitButton.style.opacity = '1';
             }
         });
 
+        // Animate new attempt
+        function animateNewAttempt(guess, feedback) {
+            const attemptRow = document.querySelector(`[data-attempt="${currentAttempts + 1}"]`);
+            if (!attemptRow) return;
+
+            const letterBoxes = attemptRow.querySelectorAll('.letter-box');
+
+            // Set letters and apply feedback
+            letterBoxes.forEach((box, index) => {
+                box.textContent = guess[index];
+                box.classList.remove('empty');
+
+                const status = feedback[index].status.toLowerCase();
+                setTimeout(() => {
+                    box.classList.add(status);
+                }, index * 100);
+            });
+        }
+
         // Restart game
         function restartGame() {
-            if (confirm('Start a new game?')) {
+            if (confirm('¿Iniciar una nueva partida?')) {
                 window.location.href = '/';
             }
         }
 
         // Focus first input on page load
         document.addEventListener('DOMContentLoaded', () => {
-            const inputs = document.querySelectorAll('#guess-form input[type="text"]');
+            const inputs = document.querySelectorAll('#input-container input');
             if (inputs.length > 0) {
                 inputs[0].focus();
             }

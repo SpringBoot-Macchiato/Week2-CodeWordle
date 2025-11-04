@@ -1,121 +1,227 @@
 # CodeWordle
 
-Una aplicación educativa inspirada en el clásico juego Wordle, enfocada en el aprendizaje de términos relacionados con programación y tecnología.
+A modern educational word-guessing game focused on programming and technology terminology, inspired by the classic Wordle game.
 
-## 🎯 Descripción
+## Overview
 
-CodeWordle permite a los usuarios jugar juegos de adivinanza de palabras con vocabulario técnico de diferentes temas como Java, Spring, DevOps y Bases de Datos. El juego sigue las reglas clásicas de Wordle pero con palabras específicas del mundo de la programación.
+CodeWordle is a web-based application that allows users to play word-guessing games with technical vocabulary from different programming domains including Java, Spring Framework, DevOps, and Databases. The game follows the classic Wordle mechanics with a focus on educational programming terms.
 
-## 🚀 Características
+## Key Features
 
-- **Temas Educativos**: Java, Spring Framework, DevOps, Bases de Datos
-- **Palabras de 5 letras**: Todas las palabras están estandarizadas a 5 letras
-- **Retroalimentación Visual**: Sistema de colores para letras correctas, presentes y ausentes
-- **Interfaz Dinámica**: UI que se adapta automáticamente a diferentes longitudes de palabra
-- **Teclado Virtual**: Teclado interactivo para facilitar la entrada
-- **Persistencia**: Base de datos H2 para almacenar partidas e intentos
-- **Validación Robusta**: Validación tanto en cliente como servidor
+- **Thematic Learning**: Organized word sets across four technology domains (Java, Spring, DevOps, Databases)
+- **Flexible Word Validation**: Accepts any valid 5-letter word for gameplay flexibility
+- **Real-time Feedback**: Color-coded visual feedback system for letter positions
+- **Modern UI**: Glassmorphism design with gradient backgrounds and smooth animations
+- **Persistent State**: Game sessions and attempts stored in H2 database
+- **Responsive Design**: Fully responsive interface built with Tailwind CSS
+- **AJAX Integration**: Seamless gameplay without page reloads
 
-## 🛠️ Stack Tecnológico
+## Technology Stack
 
-- **Java 21**
-- **Spring Boot 3.5.7** (Web, Validation, JDBC)
-- **Base de datos H2** (en memoria)
-- **Spring JDBC** con JdbcTemplate
-- **JSP** con Jakarta Tag Library (JSTL)
-- **Tailwind CSS** para estilos (via CDN)
-- **Lombok** para simplificación de modelos
+**Backend**
+- Java 21
+- Spring Boot 3.5.7
+- Spring JDBC with JdbcTemplate
+- H2 Database (in-memory)
+- Jakarta Bean Validation
 
-## 📋 Requisitos Previos
+**Frontend**
+- JSP with JSTL
+- Tailwind CSS 4 (via CDN)
+- Vanilla JavaScript (ES6+)
+- Fetch API for AJAX requests
 
-- Java 21 o superior
-- Maven 3.6 o superior
-- Navegador web moderno
+**Testing**
+- JUnit 5
+- Mockito
+- Spring Boot Test
 
-## 🚀 Instalación y Ejecución
+**Build Tool**
+- Maven 3.6+
 
-### 1. Compilar y ejecutar
+## Prerequisites
+
+- Java Development Kit (JDK) 21 or higher
+- Apache Maven 3.6 or higher
+- Modern web browser with JavaScript enabled
+
+## Installation and Setup
+
+### Clone and Build
+
 ```bash
+# Clone the repository
+git clone <repository-url>
+cd codewordle
+
+# Compile the project
 mvn clean compile
+
+# Run the application
 mvn spring-boot:run
 ```
 
-### 2. Acceder a la aplicación
-Abrir el navegador y navegar a: `http://localhost:8080`
+### Access the Application
 
-## 🎮 Cómo Jugar
+Navigate to `http://localhost:8080` in your web browser.
 
-1. **Seleccionar Tema**: En la página principal, elige un tema de programación
-2. **Ingresar Intentos**: Usa el teclado virtual o tu teclado físico para ingresar palabras
-3. **Recibir Retroalimentación**:
-   - 🟩 Verde: Letra correcta en posición correcta
-   - 🟨 Amarillo: Letra correcta en posición incorrecta
-   - ⬜ Gris: Letra no presente en la palabra
-4. **Ganar o Perder**: Tienes 6 intentos para adivinar la palabra
+## Application Architecture
 
-## 📁 Estructura del Proyecto
+### Project Structure
 
 ```
 src/main/java/com/crudzaso/codewordle/
- ├─ controller/       # Controladores MVC y REST
- ├─ service/         # Lógica de negocio
- ├─ repository/      # Acceso a datos
- ├─ model/           # Modelos de datos
+├── controller/          # MVC and REST controllers
+│   ├── ViewController.java
+│   └── GameRestController.java
+├── service/             # Business logic layer
+│   ├── GameService.java
+│   ├── WordValidationService.java
+│   ├── GameSessionService.java
+│   └── AttemptService.java
+├── repository/          # Data access layer
+│   ├── ThemeRepository.java
+│   ├── WordRepository.java
+│   ├── GameSessionRepository.java
+│   └── AttemptRepository.java
+└── model/               # Domain models
+    ├── Theme.java
+    ├── Word.java
+    ├── GameSession.java
+    ├── Attempt.java
+    ├── GuessValidation.java
+    └── LetterFeedback.java
+
 src/main/resources/
- ├─ application.properties
- ├─ schema.sql       # Esquema de base de datos
- ├─ data.sql         # Datos iniciales
+├── application.properties
+├── schema.sql           # Database schema
+└── data.sql             # Initial data
+
 src/main/webapp/WEB-INF/views/
- ├─ home.jsp         # Vista principal
- └─ game.jsp         # Vista del juego
+├── home.jsp             # Theme selection page
+└── game.jsp             # Game interface
 ```
 
-## 🔧 Endpoints Principales
+### API Endpoints
 
-### MVC Endpoints
-- `GET /` - Página principal con selección de temas
-- `POST /start-game` - Iniciar nueva partida
-- `GET /game/{id}` - Página del juego
+**Web MVC Endpoints**
+- `GET /` - Home page with theme selection
+- `POST /start-game` - Initialize new game session
+- `GET /game/{sessionId}` - Game interface
 
-### REST Endpoints
-- `POST /game/{id}/guess` - Enviar intento (AJAX)
+**REST Endpoints**
+- `POST /game/{sessionId}/guess` - Submit word guess (returns JSON)
 
-## 🧪 Testing
+### Response Format
 
-Para ejecutar las pruebas unitarias:
+```json
+{
+  "valid": true,
+  "message": "Valid guess",
+  "feedback": [
+    {"letter": "C", "status": "CORRECT", "position": 0},
+    {"letter": "L", "status": "PRESENT", "position": 1},
+    {"letter": "A", "status": "ABSENT", "position": 2}
+  ],
+  "gameWon": false,
+  "gameOver": false
+}
+```
+
+## Game Rules
+
+1. Select a programming theme from the home page
+2. Enter any 5-letter word using the input boxes
+3. Submit your guess to receive feedback
+4. Interpret the color-coded feedback:
+   - **Green**: Letter is correct and in the right position
+   - **Yellow**: Letter exists in the word but in wrong position
+   - **Gray**: Letter does not exist in the target word
+5. Win by guessing the correct word within 6 attempts
+
+## Database Configuration
+
+The application uses H2 in-memory database. To access the H2 console during development:
+
+1. Start the application
+2. Navigate to `http://localhost:8080/h2-console`
+3. Use the following credentials:
+   - JDBC URL: `jdbc:h2:mem:testdb`
+   - Username: `sa`
+   - Password: (leave empty)
+
+### Database Schema
+
+**Tables**
+- `themes` - Programming themes/categories
+- `words` - 5-letter words associated with themes
+- `game_sessions` - Active and completed game sessions
+- `attempts` - Player guesses and feedback history
+
+## Testing
+
+Execute the test suite:
 
 ```bash
+# Run all tests
 mvn test
+
+# Run tests with coverage
+mvn test jacoco:report
 ```
 
-## 📊 Base de Datos
+The project includes:
+- Unit tests for services
+- Integration tests for full game flow
+- Repository tests for data access
 
-La aplicación utiliza H2 Database en memoria. Para acceder a la consola H2 durante el desarrollo:
+## Development Notes
 
-1. Ejecutar la aplicación
-2. Navegar a: `http://localhost:8080/h2-console`
-3. JDBC URL: `jdbc:h2:mem:testdb`
-4. Usuario: `sa`
-5. Contraseña: (vacío)
+### Adding New Themes
 
-## 🎨 Personalización
+Edit `src/main/resources/data.sql`:
 
-### Agregar Nuevos Temas
-
-1. Agregar tema en `src/main/resources/data.sql`:
 ```sql
 INSERT INTO themes (name, description) VALUES
-('NUEVO_TEMA', 'Descripción del nuevo tema');
-```
+('THEME_NAME', 'Theme description');
 
-2. Agregar palabras del tema:
-```sql
 INSERT INTO words (word, theme_id) VALUES
-('PALAB1', 5),
-('PALAB2', 5);
+('WORD1', <theme_id>),
+('WORD2', <theme_id>);
 ```
 
-### Modificar Estilos
+### Customizing Styles
 
-Los estilos están implementados con Tailwind CSS. Modifica las clases en los archivos JSP para personalizar la apariencia.
+The UI uses Tailwind CSS utility classes. Modify the JSP files to adjust styles:
+- `home.jsp` - Theme selection and instructions
+- `game.jsp` - Game board and input interface
 
+### Word Validation Logic
+
+The application accepts any 5-letter word composed of alphabetic characters (A-Z). The `WordValidationService` handles validation rules:
+
+```java
+public boolean isValidGuess(String guess, String targetWord, List<String> validWords) {
+    if (guess == null || targetWord == null) return false;
+    if (guess.length() != targetWord.length()) return false;
+    return guess.matches("^[a-zA-Z]+$");
+}
+```
+
+## Configuration
+
+Application properties are located in `src/main/resources/application.properties`:
+
+```properties
+server.port=8080
+spring.datasource.url=jdbc:h2:mem:testdb
+spring.h2.console.enabled=true
+```
+
+## License
+
+This project is developed for educational purposes.
+
+## Contributors
+
+Developed as part of a Spring Boot learning project.

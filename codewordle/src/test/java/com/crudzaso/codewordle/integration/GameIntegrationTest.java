@@ -75,16 +75,17 @@ class GameIntegrationTest {
     }
 
     @Test
-    void testInvalidGuess_WordNotInTheme_ShouldReturnInvalid() {
+    void testValidGuess_AnyWord_ShouldBeAccepted() {
         // Start a new game
         var gameSession = gameService.startNewGame(1L);
 
-        // Try a word that doesn't exist in the theme
+        // Try any 5-letter word (now accepted)
         GuessValidation result = gameService.validateGuess(gameSession.getId(), "HELLO");
 
-        // Verify it's rejected
-        assertFalse(result.isValid(), "HELLO should not be valid in Java theme");
-        assertEquals("Word not found in theme", result.getMessage());
+        // Verify it's accepted
+        assertTrue(result.isValid(), "Any 5-letter word should be accepted");
+        assertNotNull(result.getFeedback());
+        assertEquals(5, result.getFeedback().size());
     }
 
     @Test

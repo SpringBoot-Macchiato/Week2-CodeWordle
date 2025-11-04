@@ -190,21 +190,21 @@ class GameServiceTest {
     }
 
     @Test
-    void testValidateGuess_WordNotInTheme_ReturnsInvalidValidation() {
-        // Arrange
+    void testValidateGuess_InvalidWord_ReturnsInvalidValidation() {
+        // Arrange - Test with invalid characters (not A-Z)
         when(gameSessionService.getGameSession(1L)).thenReturn(Optional.of(testGameSession));
         when(gameSessionService.isGameInProgress(testGameSession)).thenReturn(true);
         when(wordRepository.findById(1L)).thenReturn(Optional.of(testWord));
         when(wordRepository.findByThemeId(1L)).thenReturn(List.of(testWord));
-        when(wordValidationService.isValidGuess("HELLO", "CLASS", List.of("CLASS"))).thenReturn(false);
+        when(wordValidationService.isValidGuess("123AB", "CLASS", List.of("CLASS"))).thenReturn(false);
 
         // Act
-        GuessValidation result = gameService.validateGuess(1L, "HELLO");
+        GuessValidation result = gameService.validateGuess(1L, "123AB");
 
         // Assert
         assertFalse(result.isValid());
-        assertEquals("Word not found in theme", result.getMessage());
-        verify(wordValidationService, times(1)).isValidGuess("HELLO", "CLASS", List.of("CLASS"));
+        assertEquals("Invalid word", result.getMessage());
+        verify(wordValidationService, times(1)).isValidGuess("123AB", "CLASS", List.of("CLASS"));
     }
 
     @Test

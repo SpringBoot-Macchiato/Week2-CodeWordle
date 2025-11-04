@@ -97,14 +97,14 @@ public class GameService {
             return createInvalidValidation("Guess must be " + targetWord.length() + " letters long");
         }
 
-        // Check if word exists in theme
+        // Validate the guess (accepts any 5-letter word)
         List<Word> themeWords = wordRepository.findByThemeId(gameSession.getThemeId());
         List<String> validWords = themeWords.stream()
                 .map(Word::getWord)
                 .collect(Collectors.toList());
 
         if (!wordValidationService.isValidGuess(guess, targetWord, validWords)) {
-            return createInvalidValidation("Word not found in theme");
+            return createInvalidValidation("Invalid word");
         }
 
         // Generate feedback

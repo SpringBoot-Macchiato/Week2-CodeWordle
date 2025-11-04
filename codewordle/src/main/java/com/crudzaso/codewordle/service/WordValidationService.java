@@ -55,10 +55,11 @@ public class WordValidationService {
 
     /**
      * Check if a guess is valid for the game
+     * Now accepts any 5-letter word (not restricted to theme words)
      *
      * @param guess The word to validate
      * @param targetWord The target word (for length comparison)
-     * @param validWords List of valid words for the theme
+     * @param validWords List of valid words for the theme (not used anymore but kept for compatibility)
      * @return true if guess is valid, false otherwise
      */
     public boolean isValidGuess(String guess, String targetWord, List<String> validWords) {
@@ -70,12 +71,8 @@ public class WordValidationService {
             return false;
         }
 
-        // Validate that guess contains only letters
-        if (!guess.matches("^[a-zA-Z]+$")) {
-            return false;
-        }
-
-        return validWords.stream()
-                .anyMatch(word -> word.equalsIgnoreCase(guess));
+        // Validate that guess contains only letters (A-Z)
+        // Accept any 5-letter word in English alphabet
+        return guess.matches("^[a-zA-Z]+$");
     }
 }

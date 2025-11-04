@@ -151,8 +151,8 @@ class WordValidationServiceTest {
     }
 
     @Test
-    void testIsValidGuess_WordNotInValidWords_ReturnsFalse() {
-        // Arrange
+    void testIsValidGuess_WordNotInValidWords_ReturnsTrue() {
+        // Arrange - Now accepts any 5-letter word
         String guess = "HELLO";
         String targetWord = "CLASS";
         List<String> validWords = List.of("CLASS", "ARRAY", "FIELD");
@@ -161,6 +161,6 @@ class WordValidationServiceTest {
         boolean result = wordValidationService.isValidGuess(guess, targetWord, validWords);
 
         // Assert
-        assertFalse(result, "Palabra no presente en lista válida debería retornar false");
+        assertTrue(result, "Any 5-letter word should be accepted");
     }
 }
